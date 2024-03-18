@@ -1,5 +1,4 @@
 import axios from "axios";
-import { useCurrentUserData } from "@/lib/zustand";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api/",
@@ -10,7 +9,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   async (config) => {
     // * Pakai getState untuk mencegah error hooks hanya boleh dipakai didalam component
-    const { token } = useCurrentUserData.getState();
+    const token = localStorage.getItem("token");
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -40,6 +39,8 @@ axiosInstance.interceptors.response.use(
         const response = (
           await axiosInstance.post<{ message: string; token: string }>("/auth/refresh", null)
         ).data;
+
+        localStorage.setItem("token", response.token);
 
         // Update the Authorization header with the new token
         originalRequest.headers.Authorization = `Bearer ${response.token}`;

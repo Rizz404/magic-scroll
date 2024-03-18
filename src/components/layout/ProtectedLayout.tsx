@@ -14,10 +14,10 @@ const ProtectedLayout = () => {
   }, [currentUserInfo, navigate]);
 
   return (
-    <>
+    <div className="w-screen">
       <Navbar />
       <Outlet />
-    </>
+    </div>
   );
 };
 export default ProtectedLayout;

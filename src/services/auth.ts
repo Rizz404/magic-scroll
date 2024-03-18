@@ -26,12 +26,14 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
       if (authType === "login") {
         setToken(response.token!);
         setCurrentUserInfo(response.data);
-        toast.success(response.message);
+        localStorage.setItem("token", response.token!);
       }
+      toast.success(response.message);
       navigate(navigateTo);
     },
     onError: (error) => {
-      console.log(error);
+      console.log(error.message);
+      toast.error(error.message);
     },
   });
 };

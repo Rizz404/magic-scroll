@@ -24,7 +24,7 @@ const HomePage = () => {
   };
 
   return (
-    <div>
+    <div className="">
       {isLoading && <span>loading</span>}
       {isError && <span>Error {error?.message}</span>}
       {users.length === 0 && <span>No user found</span>}

@@ -1,52 +1,63 @@
+import { LoginSchema } from "@/lib/zod/auth";
 import { useAuthMutation } from "@/services/auth";
-import { LoginInput } from "@/types/User";
-import React, { FormEvent, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 const LoginPage = () => {
-  const [formRegister, setFormRegister] = useState<LoginInput>({
-    username: "",
-    password: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginSchema>({
+    resolver: zodResolver(LoginSchema),
   });
 
-  const { mutate } = useAuthMutation({ navigateTo: "/", authType: "login" });
+  const { mutate, isPending } = useAuthMutation({ navigateTo: "/", authType: "login" });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormRegister({
-      ...formRegister,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    mutate(formRegister);
-    setFormRegister({ username: "", password: "" });
+  const onSubmit: SubmitHandler<LoginSchema> = (data) => {
+    mutate({ username: data.username, password: data.password });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="username">Username</label>
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto mt-10">
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text">Username</span>
+        </label>
         <input
+          {...register("username")}
           type="text"
-          name="username"
-          id="username"
-          value={formRegister.username}
-          onChange={handleChange}
+          placeholder="username"
+          className="input input-bordered"
         />
+        <label className="label">
+          <span className="label-text-alt text-error">{errors.username?.message}</span>
+        </label>
       </div>
-      <div>
-        <label htmlFor="password">Password</label>
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text">Password</span>
+        </label>
         <input
+          {...register("password")}
           type="password"
-          name="password"
-          id="password"
-          value={formRegister.password}
-          onChange={handleChange}
+          placeholder="password"
+          className="input input-bordered"
         />
+        <label className="label">
+          <span className="label-text-alt text-error">{errors.password?.message}</span>
+        </label>
       </div>
 
-      <button type="submit">Login</button>
+      <div className="form-control">
+        <p className=" text-end link-hover mb-3">
+          <Link to="/register">Register</Link>
+        </p>
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting || isPending}>
+          Login
+        </button>
+      </div>
     </form>
   );
 };
