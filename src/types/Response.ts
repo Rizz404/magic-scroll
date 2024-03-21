@@ -1,3 +1,12 @@
+import { AxiosError } from "axios";
+
+export interface ServerErrorResponse {
+  message: string;
+  // Tambahkan properti lain yang sesuai dengan struktur data respons error server Anda
+}
+
+export interface CustomAxiosError<T = ServerErrorResponse> extends AxiosError<T> {}
+
 export interface MutationResponse<T> {
   message: string;
   data: T;

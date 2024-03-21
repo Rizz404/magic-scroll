@@ -1,9 +1,10 @@
 import axiosInstance from "@/config/axiosInstance";
 import { RegisterInput, AuthResponse, LoginInput } from "@/types/User";
 import { useCurrentUserData } from "@/lib/zustand";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { CustomAxiosError } from "@/types/Response";
 
 interface UseAuthMutationProps {
   navigateTo: string;
@@ -17,8 +18,8 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
   const navigate = useNavigate();
   const { setToken, setCurrentUserInfo } = useCurrentUserData();
 
-  return useMutation<AuthResponse, Error, T>({
-    mutationKey: ["auth"],
+  return useMutation<AuthResponse, CustomAxiosError, T>({
+    mutationKey: ["auth", "users"],
     mutationFn: async (userData: T) => {
       return (await axiosInstance.post<AuthResponse>(`/auth/${authType}`, userData)).data;
     },
@@ -31,10 +32,31 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
       toast.success(response.message);
       navigate(navigateTo);
     },
-    onError: (error) => {
-      console.log(error.message);
-      toast.error(error.message);
+    onError: (error: CustomAxiosError) => {
+      if (error.response) {
+        const errorMessage = error.response.data.message;
+        if (typeof errorMessage === "string") {
+          toast.error(errorMessage); // Tipe data sudah dipastikan sebagai string
+        } else {
+          toast.error("Terjadi kesalahan");
+        }
+      } else if (error.request) {
+        console.log(error.request);
+      } else {
+        console.log("Error", error.message);
+        toast.error("Terjadi kesalahan");
+      }
     },
+  });
+};
+
+export const useGoogleLogin = () => {
+  return useQuery({
+    queryKey: ["auth", "users"],
+    queryFn: async () => {
+      return (await axiosInstance.get("/auth/google")).data;
+    },
+    enabled: false,
   });
 };
 
@@ -42,7 +64,7 @@ export const useLogoutMutation = ({ navigateTo }: Omit<UseAuthMutationProps, "au
   const navigate = useNavigate();
   const { setToken, setCurrentUserInfo } = useCurrentUserData();
 
-  return useMutation({
+  return useMutation<{ message: string }, CustomAxiosError, null>({
     mutationKey: ["auth"],
     mutationFn: async () => {
       return (await axiosInstance.post<{ message: string }>("/auth/logout")).data;

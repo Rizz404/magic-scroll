@@ -1,5 +1,5 @@
 import { LoginSchema } from "@/lib/zod/auth";
-import { useAuthMutation } from "@/services/auth";
+import { useAuthMutation, useGoogleLogin } from "@/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -14,9 +14,10 @@ const LoginPage = () => {
   });
 
   const { mutate, isPending } = useAuthMutation({ navigateTo: "/", authType: "login" });
+  const { data, isLoading, refetch } = useGoogleLogin();
 
   const onSubmit: SubmitHandler<LoginSchema> = (data) => {
-    mutate({ username: data.username, password: data.password });
+    mutate({ ...data });
   };
 
   return (
@@ -54,8 +55,16 @@ const LoginPage = () => {
         <p className=" text-end link-hover mb-3">
           <Link to="/register">Register</Link>
         </p>
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting || isPending}>
-          Login
+        <button type="submit" className="btn btn-primary mb-3" disabled={isSubmitting || isPending}>
+          <span className=" text-xl text-white">Login</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => refetch().then(() => (window.location.href = data.authUrl))}
+          className="btn btn-secondary">
+          <span className=" text-xl text-white">
+            {isLoading ? "Loading..." : "Login with google"}
+          </span>
         </button>
       </div>
     </form>

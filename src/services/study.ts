@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-export const useCreateStudy = ({ navigateTo }: { navigateTo: string }) => {
+export const useCreateStudy = ({ navigateTo }: { navigateTo?: string }) => {
   const navigate = useNavigate();
   return useMutation<MutationResponse<Study>, Error, Pick<Study, "name" | "image" | "description">>(
     {
@@ -15,7 +15,7 @@ export const useCreateStudy = ({ navigateTo }: { navigateTo: string }) => {
       },
       onSuccess: (response) => {
         toast.success(response.message);
-        navigate(navigateTo);
+        navigateTo && navigate(navigateTo);
       },
       onError: (error) => {
         toast.error(error.message);

@@ -14,7 +14,7 @@ const RegisterPage = () => {
   const { mutate, isPending } = useAuthMutation({ navigateTo: "/login", authType: "register" });
 
   const onSubmit: SubmitHandler<RegisterSchema> = (data) => {
-    mutate({ username: data.username, email: data.email, password: data.password });
+    mutate({ ...data });
   };
 
   return (
@@ -59,6 +59,20 @@ const RegisterPage = () => {
         />
         <label className="label">
           <span className="label-text-alt text-error">{errors.password?.message}</span>
+        </label>
+      </div>
+      <div className="form-control">
+        <label htmlFor="confirmPassword" className="label">
+          <span className="label-text">Confirm Password</span>
+        </label>
+        <input
+          type="password"
+          {...register("confirmPassword")}
+          placeholder="confirmPassword"
+          className="input input-bordered"
+        />
+        <label className="label">
+          <span className="label-text-alt text-error">{errors.confirmPassword?.message}</span>
         </label>
       </div>
 

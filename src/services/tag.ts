@@ -2,13 +2,19 @@ import axiosInstance from "@/config/axiosInstance";
 import { MutationResponse, PaginatedResponse } from "@/types/Response";
 import { Tag } from "@/types/Tag";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 export const useCreateTagMutation = () => {
   return useMutation<MutationResponse<Tag>, Error, Pick<Tag, "name" | "description">>({
     mutationKey: ["tags"],
     mutationFn: async (data) => {
-      const response = await axiosInstance.post<MutationResponse<Tag>>("/tags", data);
-      return response.data;
+      return (await axiosInstance.post<MutationResponse<Tag>>("/tags", data)).data;
+    },
+    onSuccess: (response) => {
+      toast.success(response.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 };

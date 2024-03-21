@@ -1,5 +1,5 @@
 import axiosInstance from "@/config/axiosInstance";
-import { MutationResponse, PaginatedResponse } from "@/types/Response";
+import { CustomAxiosError, MutationResponse, PaginatedResponse } from "@/types/Response";
 import { Profile, User } from "@/types/User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -37,6 +37,22 @@ export const useGetUserByIdQuery = ({ id }: { id: string }) => {
     queryKey: ["user", id],
     queryFn: async () => {
       return (await axiosInstance.get<User>(`/users/${id}`)).data;
+    },
+  });
+};
+
+export const useCheckUserAvailability = () => {
+  return useMutation<
+    { message: string },
+    CustomAxiosError,
+    {
+      username?: string;
+      email?: string;
+    }
+  >({
+    mutationKey: ["check-user"],
+    mutationFn: async (data) => {
+      return await axiosInstance.post("/users/check-user-availability", data);
     },
   });
 };

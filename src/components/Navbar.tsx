@@ -14,17 +14,33 @@ const Navbar = () => {
     <nav className="flex justify-between">
       {isError && error && <div>Error: {error.message}</div>}
       <div>
-        {currentUserInfo ? (
-          <button type="button" onClick={handleLogout} disabled={isPending}>
-            {isPending ? "Logging out..." : "logout"}
-          </button>
-        ) : (
-          <Link to="/login">login</Link>
-        )}
+        <Link to="/">Home</Link>
       </div>
       <div>
-        <Link to="/profile">profile</Link>
+        {currentUserInfo ? (
+          <button type="button" onClick={handleLogout} disabled={isPending}>
+            {isPending ? "Logging out..." : "Logout"}
+          </button>
+        ) : (
+          <Link to="/login">Login</Link>
+        )}
       </div>
+      {currentUserInfo && (
+        <>
+          <div>
+            <Link to="/profile">Profile</Link>
+          </div>
+          <div>
+            <Link to="/create-tag">Create Tag</Link>
+          </div>
+          <div>
+            <Link to="/create-study">Create Study</Link>
+          </div>
+          <div>
+            <Link to="/create-note">Create Note</Link>
+          </div>
+        </>
+      )}
     </nav>
   );
 };

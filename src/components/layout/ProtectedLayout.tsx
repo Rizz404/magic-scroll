@@ -1,23 +1,17 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import Navbar from "../Navbar";
 import { useCurrentUserData } from "@/lib/zustand";
-import { useEffect } from "react";
 
 const ProtectedLayout = () => {
-  const navigate = useNavigate();
   const { currentUserInfo } = useCurrentUserData();
 
-  useEffect(() => {
-    if (!currentUserInfo) {
-      return navigate("/", { replace: true });
-    }
-  }, [currentUserInfo, navigate]);
-
-  return (
+  return currentUserInfo ? (
     <div className="w-screen">
       <Navbar />
       <Outlet />
     </div>
+  ) : (
+    <Navigate to="/" replace />
   );
 };
 export default ProtectedLayout;
