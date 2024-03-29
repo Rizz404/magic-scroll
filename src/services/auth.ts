@@ -1,10 +1,12 @@
 import axiosInstance from "@/config/axiosInstance";
 import { RegisterInput, AuthResponse, LoginInput } from "@/types/User";
 import { useCurrentUserData } from "@/lib/zustand";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CustomAxiosError } from "@/types/Response";
+import { getRedirectResult, signInWithRedirect } from "firebase/auth";
+import { firebaseAuth, googleProvider } from "@/config/firebaseConfig";
 
 interface UseAuthMutationProps {
   navigateTo: string;
@@ -16,7 +18,7 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
   authType,
 }: UseAuthMutationProps) => {
   const navigate = useNavigate();
-  const { setToken, setCurrentUserInfo } = useCurrentUserData();
+  const { setCurrentUserInfo } = useCurrentUserData();
 
   return useMutation<AuthResponse, CustomAxiosError, T>({
     mutationKey: ["auth", "users"],
@@ -25,7 +27,6 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
     },
     onSuccess: (response) => {
       if (authType === "login") {
-        setToken(response.token!);
         setCurrentUserInfo(response.data);
         localStorage.setItem("token", response.token!);
       }
@@ -50,27 +51,75 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
   });
 };
 
-export const useGoogleLogin = () => {
-  return useQuery({
+export const useGoogleLogin = ({ navigateTo }: Omit<UseAuthMutationProps, "authType">) => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { setCurrentUserInfo } = useCurrentUserData();
+
+  const signInWithGoogle = async () => {
+    try {
+      await signInWithRedirect(firebaseAuth, googleProvider);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useQuery({
     queryKey: ["auth", "users"],
     queryFn: async () => {
-      return (await axiosInstance.get("/auth/google")).data;
+      const result = await getRedirectResult(firebaseAuth);
+
+      if (!result || result === null) {
+        throw new Error("Somehow result is null");
+      }
+
+      const userData = result.user;
+
+      const response = await axiosInstance.post<AuthResponse>("/auth/oauth", {
+        uid: userData.uid,
+        displayName: userData.displayName,
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+        photoUrl: userData.photoURL,
+      });
+
+      localStorage.setItem("token", response.data.token!);
+      setCurrentUserInfo(response.data.data);
+
+      return response;
     },
-    enabled: false,
   });
+
+  const handleGoogleRedirect = useMutation({
+    mutationKey: ["auth", "users"],
+    mutationFn: async () => {
+      await signInWithGoogle();
+    },
+    onSuccess: () => {
+      navigate(navigateTo);
+      queryClient.invalidateQueries({ queryKey: ["auth", "users"] });
+      toast.success("Login successful");
+    },
+    onError: (error: Error) => {
+      console.log(error);
+      toast.error(error.message);
+    },
+  });
+
+  return handleGoogleRedirect;
 };
 
 export const useLogoutMutation = ({ navigateTo }: Omit<UseAuthMutationProps, "authType">) => {
   const navigate = useNavigate();
-  const { setToken, setCurrentUserInfo } = useCurrentUserData();
+  const { setCurrentUserInfo } = useCurrentUserData();
 
-  return useMutation<{ message: string }, CustomAxiosError, null>({
+  return useMutation<{ message: string }, CustomAxiosError>({
     mutationKey: ["auth"],
     mutationFn: async () => {
       return (await axiosInstance.post<{ message: string }>("/auth/logout")).data;
     },
     onSuccess: (response) => {
-      setToken(null);
+      localStorage.removeItem("token");
       setCurrentUserInfo(null);
       navigate(navigateTo);
       toast.success(response.message || "Logout successful");

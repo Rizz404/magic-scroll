@@ -11,10 +11,11 @@ const CreateStudy = () => {
     formState: { isSubmitting, errors },
   } = useForm<StudySchema>({ resolver: zodResolver(StudySchema) });
 
-  const { mutate, isPending } = useCreateStudy({});
+  const { mutate, isPending } = useCreateStudy({ navigateTo: "/" });
 
   const onSubmit: SubmitHandler<StudySchema> = (data) => {
     mutate({ ...data });
+    console.log({ ...data });
     reset();
   };
   return (
@@ -31,20 +32,6 @@ const CreateStudy = () => {
         />
         <label className="label">
           <span className="label-text-alt text-error">{errors.name?.message}</span>
-        </label>
-      </div>
-      <div className="form-control">
-        <label htmlFor="name" className=" label">
-          <span className=" label-text">Image</span>
-        </label>
-        <input
-          type="text"
-          {...register("image")}
-          placeholder="image"
-          className=" input input-bordered"
-        />
-        <label className="label">
-          <span className="label-text-alt text-error">{errors.image?.message}</span>
         </label>
       </div>
       <div className="form-control">

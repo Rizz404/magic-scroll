@@ -14,7 +14,7 @@ const LoginPage = () => {
   });
 
   const { mutate, isPending } = useAuthMutation({ navigateTo: "/", authType: "login" });
-  const { data, isLoading, refetch } = useGoogleLogin();
+  const { mutate: mutateOauth, isPending: isPendingOauth } = useGoogleLogin({ navigateTo: "/" });
 
   const onSubmit: SubmitHandler<LoginSchema> = (data) => {
     mutate({ ...data });
@@ -58,12 +58,9 @@ const LoginPage = () => {
         <button type="submit" className="btn btn-primary mb-3" disabled={isSubmitting || isPending}>
           <span className=" text-xl text-white">Login</span>
         </button>
-        <button
-          type="button"
-          onClick={() => refetch().then(() => (window.location.href = data.authUrl))}
-          className="btn btn-secondary">
+        <button type="button" onClick={() => mutateOauth()} className="btn btn-secondary">
           <span className=" text-xl text-white">
-            {isLoading ? "Loading..." : "Login with google"}
+            {isPendingOauth ? "Loading..." : "Login with google"}
           </span>
         </button>
       </div>

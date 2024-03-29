@@ -5,8 +5,6 @@ import { persist } from "zustand/middleware";
 type UserInfo = Omit<User, "password" | "createdAt" | "updatedAt">;
 
 interface CurrentUserData {
-  token: string | null;
-  setToken: (token: string | null) => void;
   currentUserInfo: UserInfo | null;
   setCurrentUserInfo: (currentUserInfo: UserInfo | null) => void;
 }
@@ -15,8 +13,6 @@ interface CurrentUserData {
 export const useCurrentUserData = create(
   persist<CurrentUserData>(
     (set) => ({
-      token: null,
-      setToken: (token: string | null) => set({ token }),
       currentUserInfo: null,
       setCurrentUserInfo: (currentUserInfo: UserInfo | null) => set({ currentUserInfo }),
     }),

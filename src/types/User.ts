@@ -5,7 +5,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  password: string;
+  password?: string;
   role: Roles;
   isOauth: boolean;
   lastLogin: Date;
@@ -27,6 +27,14 @@ export interface Profile {
   socialMedias: string[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface OauthInput {
+  uid: string;
+  displayName: string;
+  email: string;
+  phoneNumber: string;
+  photoUrl: string;
 }
 
 // * Detailed

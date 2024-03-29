@@ -5,7 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 export const useGetPaginatedUsersQuery = ({ page, limit }: { page: number; limit: number }) => {
-  const { data, ...muchMore } = useQuery<PaginatedResponse<Omit<User, "password">>, Error>({
+  const { data, ...muchMore } = useQuery<
+    PaginatedResponse<Omit<User, "password">>,
+    CustomAxiosError
+  >({
     queryKey: ["users", page, limit],
     queryFn: async () => {
       return (
@@ -24,7 +27,7 @@ export const useGetPaginatedUsersQuery = ({ page, limit }: { page: number; limit
 };
 
 export const useGetUserProfileQuery = () => {
-  return useQuery<User, Error>({
+  return useQuery<User, CustomAxiosError>({
     queryKey: ["user", "profile"],
     queryFn: async () => {
       return (await axiosInstance.get<User>("/users/profile")).data;
@@ -33,7 +36,7 @@ export const useGetUserProfileQuery = () => {
 };
 
 export const useGetUserByIdQuery = ({ id }: { id: string }) => {
-  return useQuery<User, Error>({
+  return useQuery<User, CustomAxiosError>({
     queryKey: ["user", id],
     queryFn: async () => {
       return (await axiosInstance.get<User>(`/users/${id}`)).data;
@@ -61,7 +64,7 @@ export const useUpdateUserQuery = () => {
   const queryClient = useQueryClient();
   return useMutation<
     MutationResponse<Omit<User, "password" | "profile">>,
-    Error,
+    CustomAxiosError,
     Pick<User, "username" | "email">
   >({
     mutationKey: ["user", "update"],
@@ -88,7 +91,7 @@ export const useUpdateUserProfileQuery = () => {
   const queryClient = useQueryClient();
   return useMutation<
     MutationResponse<Profile>,
-    Error,
+    CustomAxiosError,
     Omit<Profile, "id" | "createdAt" | "updatedAt">
   >({
     mutationKey: ["profile", "update"],
@@ -108,7 +111,7 @@ export const useUpdateUserProfileQuery = () => {
 
 export const useFollowOrUnfollowUserMutation = ({ id }: { id: string }) => {
   const queryClient = useQueryClient();
-  return useMutation<MutationResponse<User>, Error, string>({
+  return useMutation<MutationResponse<User>, CustomAxiosError, string>({
     mutationKey: ["user", id, "follow"],
     mutationFn: async () => {
       return (await axiosInstance.patch<MutationResponse<User>>(`/users/follow/${id}`)).data;
