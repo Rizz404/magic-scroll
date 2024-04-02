@@ -15,8 +15,9 @@ const NoteCard = ({ ...note }: Note) => {
 
   return (
     <div className="even:bg-gray-400 odd:bg-blue-400 rounded shadow overflow-hidden">
-      <div className="flex justify-between flex-row-reverse p-2">
-        <span>{note.userId}</span>
+      <div className="flex justify-between p-2">
+        <span>{note.user.username}</span>
+        {note.user.isVerified && <div className=" rounded-full bg-green-500 w-2"></div>}
       </div>
       <img
         src={note.thumbnailImage as string}
@@ -24,10 +25,27 @@ const NoteCard = ({ ...note }: Note) => {
         className="w-full object-cover"
       />
       <div className="p-4">
+        <div className="border">
+          <div className="flex gap-1 justify-end  rounded-badge">
+            <img
+              src={note.study.image?.toString()}
+              alt={note.study.name}
+              className="w-4 rounded-full"
+            />
+            <h6 className="">{note.study.name}</h6>
+          </div>
+        </div>
         <h3 className="py-2 mb-2 border-b font-bold hover:text-red-300">
           <Link to={`/note/${note.id}`}>{note.title}</Link>
         </h3>
         <span className="text-sm block mb-2">{note.content}</span>
+        <div className="flex items-center flex-wrap mb-2">
+          {note.tags.map((tag, index) => (
+            <span className="btn btn-xs btn-outline text-black" key={index}>
+              {tag.name}
+            </span>
+          ))}
+        </div>
         <div className=" flex justify-between items-center py-2 px-4 border rounded-md">
           <UpvoteButton
             noteId={note.id}

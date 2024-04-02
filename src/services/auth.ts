@@ -1,19 +1,19 @@
 import axiosInstance from "@/config/axiosInstance";
-import { RegisterInput, AuthResponse, LoginInput } from "@/types/User";
+import { RegisterInput, AuthResponse, LoginInput, OauthInput } from "@/types/User";
 import { useCurrentUserData } from "@/lib/zustand";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CustomAxiosError } from "@/types/Response";
-import { getRedirectResult, signInWithRedirect, signOut } from "firebase/auth";
-import { firebaseAuth, googleProvider } from "@/config/firebaseConfig";
+import { firebaseAuth } from "@/config/firebaseConfig";
+import { signOut } from "firebase/auth";
 
 interface UseAuthMutationProps {
-  navigateTo: string;
-  authType: "register" | "login";
+  navigateTo?: string;
+  authType: "register" | "login" | "oauth";
 }
 
-export const useAuthMutation = <T extends RegisterInput | LoginInput>({
+export const useAuthMutation = <T extends RegisterInput | LoginInput | OauthInput>({
   navigateTo,
   authType,
 }: UseAuthMutationProps) => {
@@ -26,12 +26,12 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
       return (await axiosInstance.post<AuthResponse>(`/auth/${authType}`, userData)).data;
     },
     onSuccess: (response) => {
-      if (authType === "login") {
+      if (authType === "login" || authType === "oauth") {
         setCurrentUserInfo(response.data);
         localStorage.setItem("token", response.token!);
       }
       toast.success(response.message);
-      navigate(navigateTo);
+      navigateTo && navigate(navigateTo);
     },
     onError: (error: CustomAxiosError) => {
       if (error.response) {
@@ -51,64 +51,6 @@ export const useAuthMutation = <T extends RegisterInput | LoginInput>({
   });
 };
 
-export const useGoogleLogin = ({ navigateTo }: Omit<UseAuthMutationProps, "authType">) => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { setCurrentUserInfo } = useCurrentUserData();
-
-  const signInWithGoogle = async () => {
-    try {
-      await signInWithRedirect(firebaseAuth, googleProvider);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useQuery({
-    queryKey: ["auth", "users"],
-    queryFn: async () => {
-      const result = await getRedirectResult(firebaseAuth);
-
-      if (!result || result === null) {
-        throw new Error("Somehow result is null");
-      }
-
-      const userData = result.user;
-
-      const response = await axiosInstance.post<AuthResponse>("/auth/oauth", {
-        uid: userData.uid,
-        displayName: userData.displayName,
-        email: userData.email,
-        phoneNumber: userData.phoneNumber,
-        photoUrl: userData.photoURL,
-      });
-
-      localStorage.setItem("token", response.data.token!);
-      setCurrentUserInfo(response.data.data);
-
-      return response;
-    },
-  });
-
-  const handleGoogleRedirect = useMutation({
-    mutationKey: ["auth", "users"],
-    mutationFn: async () => {
-      await signInWithGoogle();
-    },
-    onSuccess: () => {
-      navigate(navigateTo);
-      queryClient.invalidateQueries({ queryKey: ["auth", "users"] });
-      toast.success("Login successful");
-    },
-    onError: (error: Error) => {
-      console.log(error);
-      toast.error(error.message);
-    },
-  });
-
-  return handleGoogleRedirect;
-};
-
 export const useLogoutMutation = ({ navigateTo }: Omit<UseAuthMutationProps, "authType">) => {
   const navigate = useNavigate();
   const { setCurrentUserInfo } = useCurrentUserData();
@@ -123,15 +65,13 @@ export const useLogoutMutation = ({ navigateTo }: Omit<UseAuthMutationProps, "au
         })
       ).data;
     },
-    onMutate: async () => {
+    onSuccess: async (response) => {
       await signOut(firebaseAuth);
-    },
-    onSuccess: (response) => {
       localStorage.removeItem("token");
       setCurrentUserInfo(null);
-      navigate(navigateTo);
+      navigateTo && navigate(navigateTo);
       toast.success(response.message || "Logout successful");
-      queryClient.invalidateQueries();
+      queryClient.removeQueries();
     },
     onError: (error: Error) => {
       console.log(error);

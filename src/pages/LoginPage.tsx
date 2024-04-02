@@ -1,5 +1,6 @@
+import useOauthFirebase from "@/hooks/useOauthFirebase";
 import { LoginSchema } from "@/lib/zod/auth";
-import { useAuthMutation, useGoogleLogin } from "@/services/auth";
+import { useAuthMutation } from "@/services/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
@@ -14,11 +15,15 @@ const LoginPage = () => {
   });
 
   const { mutate, isPending } = useAuthMutation({ navigateTo: "/", authType: "login" });
-  const { mutate: mutateOauth, isPending: isPendingOauth } = useGoogleLogin({ navigateTo: "/" });
+  const { signInWithGoogle, isLoading, isPending: oauthPending } = useOauthFirebase();
 
   const onSubmit: SubmitHandler<LoginSchema> = (data) => {
     mutate({ ...data });
   };
+
+  if (isLoading || oauthPending) {
+    return <span>Loading</span>;
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto mt-10">
@@ -58,9 +63,12 @@ const LoginPage = () => {
         <button type="submit" className="btn btn-primary mb-3" disabled={isSubmitting || isPending}>
           <span className=" text-xl text-white">Login</span>
         </button>
-        <button type="button" onClick={() => mutateOauth()} className="btn btn-secondary">
+        <button
+          type="button"
+          onClick={async () => signInWithGoogle()}
+          className="btn btn-secondary">
           <span className=" text-xl text-white">
-            {isPendingOauth ? "Loading..." : "Login with google"}
+            {isLoading ? "Loading..." : "Login with google"}
           </span>
         </button>
       </div>
