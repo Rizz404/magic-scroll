@@ -1,12 +1,10 @@
 import { useCurrentUserData } from "@/lib/zustand";
-import { useLogoutMutation } from "@/services/auth";
 import { FaSearch } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { currentUserInfo } = useCurrentUserData();
-  const { mutate, isPending } = useLogoutMutation({ navigateTo: "/login" });
 
   return (
     <header className=" bg-cyan-400 py-2">
@@ -94,12 +92,15 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <button
-                  className=" bg-cyan-600 font-bold rounded-full p-2 hover:text-white"
-                  type="button"
-                  onClick={() => mutate()}>
-                  {isPending ? "Loading..." : "Logout"}
-                </button>
+                <NavLink
+                  to="/profile"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-cyan-950 font-bold text-lg underline underline-offset-8"
+                      : "text-cyan-950 font-bold text-lg hover:underline underline-offset-8"
+                  }>
+                  Profile{" "}
+                </NavLink>
               )}
             </div>
           </div>

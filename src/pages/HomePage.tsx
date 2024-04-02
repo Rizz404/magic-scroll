@@ -1,7 +1,7 @@
+import NoteCard from "@/components/note/NoteCard";
 import ErrorCard from "@/components/status/ErrorCard";
 import LoadingCard from "@/components/status/LoadingCard";
-import UserCard from "@/components/user/UserCard";
-import { useGetPaginatedUsersQuery } from "@/services/user";
+import { useGetPaginatedNotes } from "@/services/note";
 import React from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -10,7 +10,12 @@ const HomePage = () => {
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 20;
 
-  const { users, isLoading, isError, error, paginationState } = useGetPaginatedUsersQuery({
+  const {
+    data: notes,
+    isLoading,
+    isError,
+    error,
+  } = useGetPaginatedNotes({
     page,
     limit,
   });
@@ -30,21 +35,21 @@ const HomePage = () => {
   return (
     <div className="text-cyan-950 bg-cyan-100 py-2">
       <div className="px-2 lg:px-8">
+        <div className="absolute z-10 flex justify-center items-center">
+          {isLoading && <LoadingCard isLoading={isLoading} context="Loading notes data" />}
+          {isError && <ErrorCard isError={isError} context="Error notes data" error={error!} />}
+        </div>
         <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 min-h-screen relative mb-3">
-          <div className="absolute inset-0 z-10 flex justify-center items-center">
-            {isLoading && <LoadingCard isLoading={isLoading} context="Loading user data" />}
-            {isError && <ErrorCard isError={isError} context="Error user data" error={error!} />}
-          </div>
-          {users.map((user, index) => (
-            <UserCard {...user} key={index} />
+          {notes?.data.map((note, index) => (
+            <NoteCard {...note} key={index} />
           ))}
         </div>
         <div className="flex justify-center items-center">
           <button
             onClick={handlePrevPage}
-            disabled={!paginationState?.hasPrevPage}
+            disabled={!notes?.paginationState?.hasPrevPage}
             className={` bg-cyan-600 text-cyan-950 text-lg p-1 font-semibold rounded-l-full hover:text-white ${
-              !paginationState?.hasPrevPage && "text-cyan-950 hover:text-red-500"
+              !notes?.paginationState?.hasPrevPage && "text-cyan-950 hover:text-red-500"
             }`}>
             prev
           </button>
@@ -59,9 +64,9 @@ const HomePage = () => {
           </select>
           <button
             onClick={handleNextPage}
-            disabled={!paginationState?.hasNextPage}
+            disabled={!notes?.paginationState?.hasNextPage}
             className={` bg-cyan-600 text-cyan-950 text-lg p-1 font-semibold rounded-r-full hover:text-white ${
-              !paginationState?.hasNextPage && "text-cyan-950 hover:text-red-500"
+              !notes?.paginationState?.hasNextPage && "text-cyan-950 hover:text-red-500"
             }`}>
             next
           </button>

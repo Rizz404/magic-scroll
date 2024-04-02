@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CustomAxiosError } from "@/types/Response";
-import { getRedirectResult, signInWithRedirect } from "firebase/auth";
+import { getRedirectResult, signInWithRedirect, signOut } from "firebase/auth";
 import { firebaseAuth, googleProvider } from "@/config/firebaseConfig";
 
 interface UseAuthMutationProps {
@@ -112,17 +112,26 @@ export const useGoogleLogin = ({ navigateTo }: Omit<UseAuthMutationProps, "authT
 export const useLogoutMutation = ({ navigateTo }: Omit<UseAuthMutationProps, "authType">) => {
   const navigate = useNavigate();
   const { setCurrentUserInfo } = useCurrentUserData();
+  const queryClient = useQueryClient();
 
   return useMutation<{ message: string }, CustomAxiosError>({
     mutationKey: ["auth"],
     mutationFn: async () => {
-      return (await axiosInstance.post<{ message: string }>("/auth/logout")).data;
+      return (
+        await axiosInstance.post<{ message: string }>("/auth/logout", null, {
+          headers: { Authorization: null },
+        })
+      ).data;
+    },
+    onMutate: async () => {
+      await signOut(firebaseAuth);
     },
     onSuccess: (response) => {
       localStorage.removeItem("token");
       setCurrentUserInfo(null);
       navigate(navigateTo);
       toast.success(response.message || "Logout successful");
+      queryClient.invalidateQueries();
     },
     onError: (error: Error) => {
       console.log(error);

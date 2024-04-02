@@ -111,13 +111,13 @@ export const useUpdateUserProfileQuery = () => {
 
 export const useFollowOrUnfollowUserMutation = ({ id }: { id: string }) => {
   const queryClient = useQueryClient();
-  return useMutation<MutationResponse<User>, CustomAxiosError, string>({
-    mutationKey: ["user", id, "follow"],
+  return useMutation<MutationResponse<User>, CustomAxiosError>({
+    mutationKey: ["follow", "user", id],
     mutationFn: async () => {
       return (await axiosInstance.patch<MutationResponse<User>>(`/users/follow/${id}`)).data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user", data.data.id] });
     },
     onError: (error) => {
       toast.error(error.message);

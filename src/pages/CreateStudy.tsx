@@ -9,13 +9,22 @@ const CreateStudy = () => {
     handleSubmit,
     reset,
     formState: { isSubmitting, errors },
-  } = useForm<StudySchema>({ resolver: zodResolver(StudySchema) });
+  } = useForm<StudySchema>({});
 
   const { mutate, isPending } = useCreateStudy({ navigateTo: "/" });
 
   const onSubmit: SubmitHandler<StudySchema> = (data) => {
-    mutate({ ...data });
-    console.log({ ...data });
+    const formData = new FormData();
+
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+
+    if (data.image) {
+      formData.append("image", data.image[0]);
+    }
+
+    mutate(formData);
+    console.log(formData);
     reset();
   };
   return (
@@ -30,6 +39,15 @@ const CreateStudy = () => {
           placeholder="name"
           className=" input input-bordered"
         />
+        <label className="label">
+          <span className="label-text-alt text-error">{errors.name?.message}</span>
+        </label>
+      </div>
+      <div className="form-control">
+        <label htmlFor="image" className=" label">
+          <span className=" label-text">Image</span>
+        </label>
+        <input type="file" {...register("image")} className=" file-input input-bordered" />
         <label className="label">
           <span className="label-text-alt text-error">{errors.name?.message}</span>
         </label>

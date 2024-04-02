@@ -10,6 +10,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import CreateStudy from "./pages/CreateStudy";
 import AuthLayout from "./components/layout/AuthLayout";
 import CreateNote from "./pages/CreateNote";
+import NoteDetailPage from "./pages/NoteDetailPage";
 
 const App = createBrowserRouter(
   // * Tidak bisa pake Routes lagi jadi pake <> aja karena sekarang pake createBrowserRouter
@@ -27,6 +28,7 @@ const App = createBrowserRouter(
         <Route path="/create-note" element={<CreateNote />} />
         <Route path="/create-tag" element={<CreateTag />} />
         <Route path="/create-study" element={<CreateStudy />} />
+        <Route path="/note/:noteId" element={<NoteDetailPage />} />
       </Route>
       <Route path="/*" errorElement={<NotFoundPage />} />
     </>

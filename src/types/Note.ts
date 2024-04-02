@@ -1,5 +1,6 @@
 import { Study } from "./Study";
 import { Tag } from "./Tag";
+import { Profile, User } from "./User";
 
 export interface Note {
   id: string;
@@ -7,16 +8,21 @@ export interface Note {
   studyId: string;
   title: string;
   content: string;
-  thumbnailImage: string | null;
-  attachments: string[];
+  thumbnailImage?: File | string;
+  attachments?: File[] | string[];
   isPrivate: boolean;
   upvotedCount: number;
+  downvotedCount: number;
+  favoritedCount: number;
+  savedCount: number;
   createdAt: Date;
   updatedAt: Date;
 
-  study: Study;
-  tags: Tag[];
+  user: UserWithImageFromProfile;
+  study: Pick<Study, "id" | "name" | "image">;
+  tags: Pick<Tag, "id" | "name">[];
   notePermission?: NotePermission[];
+  noteInteraction: NoteInteraction[];
 }
 
 export interface NotePermission {
@@ -27,3 +33,24 @@ export interface NotePermission {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface NoteInteraction {
+  userId: string;
+  noteId: string;
+  isUpvoted: boolean;
+  isDownvoted: boolean;
+  isFavorited: boolean;
+  isSaved: boolean;
+}
+
+export type UserWithImageFromProfile = Pick<User, "username" | "email" | "isVerified"> & {
+  profile: Pick<Profile, "profileImage">;
+};
+
+export type NoteInput = Omit<
+  Note,
+  "id" | "userId" | "upvotedCount" | "createdAt" | "updatedAt" | "study"
+> & {
+  tags: Pick<Tag, "id">[];
+  notePermission: Pick<NotePermission, "userId">[];
+};

@@ -1,6 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { GoogleAuthProvider, getAuth } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  GithubAuthProvider,
+  getAuth,
+} from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,6 +23,8 @@ const analytics = getAnalytics(app);
 
 // * Auth
 const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
 googleProvider.addScope("https://www.googleapis.com/auth/contacts.readonly");
 
@@ -25,4 +32,4 @@ const firebaseAuth = getAuth();
 
 firebaseAuth.languageCode = "it";
 
-export { app, googleProvider, firebaseAuth, analytics };
+export { app, googleProvider, facebookProvider, githubProvider, firebaseAuth, analytics };
