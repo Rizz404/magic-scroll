@@ -7,10 +7,10 @@ const TestPage = () => {
     useSearchStudyByName({});
 
   const handleClickSearch = () => {
-    navigate(`/test-studies/search?=${query}`);
+    navigate(`/test-studies/${query}`);
   };
 
-  console.log(studies);
+
 
   return (
     <>
@@ -42,6 +42,7 @@ const TestPage = () => {
             studies.map((study) => <li key={study.id}>{study.name}</li>)}
         </ul>
       )}
+
     </>
   );
 };

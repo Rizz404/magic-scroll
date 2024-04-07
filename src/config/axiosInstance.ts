@@ -37,7 +37,10 @@ axiosInstance.interceptors.response.use(
       try {
         // Try to refresh the token
         const response = (
-          await axiosInstance.post<{ message: string; token: string }>("/auth/refresh", null)
+          await axiosInstance.post<{ message: string; token: string }>(
+            "/auth/refresh",
+            null
+          )
         ).data;
 
         localStorage.setItem("token", response.token);

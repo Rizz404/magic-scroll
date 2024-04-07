@@ -1,10 +1,20 @@
 import axiosInstance from "@/config/axiosInstance";
-import { CustomAxiosError, MutationResponse, PaginatedResponse } from "@/types/Response";
+import {
+  CustomAxiosError,
+  MutationResponse,
+  PaginatedResponse,
+} from "@/types/Response";
 import { Profile, User } from "@/types/User";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-export const useGetPaginatedUsersQuery = ({ page, limit }: { page: number; limit: number }) => {
+export const useGetPaginatedUsersQuery = ({
+  page,
+  limit,
+}: {
+  page: number;
+  limit: number;
+}) => {
   const { data, ...muchMore } = useQuery<
     PaginatedResponse<Omit<User, "password">>,
     CustomAxiosError
@@ -12,9 +22,12 @@ export const useGetPaginatedUsersQuery = ({ page, limit }: { page: number; limit
     queryKey: ["users", page, limit],
     queryFn: async () => {
       return (
-        await axiosInstance.get<PaginatedResponse<Omit<User, "password">>>("/users", {
-          params: { page, limit },
-        })
+        await axiosInstance.get<PaginatedResponse<Omit<User, "password">>>(
+          "/users",
+          {
+            params: { page, limit },
+          }
+        )
       ).data;
     },
   });
@@ -70,10 +83,9 @@ export const useUpdateUserQuery = () => {
     mutationKey: ["user", "update"],
     mutationFn: async (data: Pick<User, "username" | "email">) => {
       return (
-        await axiosInstance.patch<MutationResponse<Omit<User, "password" | "profile">>>(
-          "/users",
-          data
-        )
+        await axiosInstance.patch<
+          MutationResponse<Omit<User, "password" | "profile">>
+        >("/users", data)
       ).data;
     },
     onSuccess: () => {
@@ -95,8 +107,15 @@ export const useUpdateUserProfileQuery = () => {
     Omit<Profile, "id" | "createdAt" | "updatedAt">
   >({
     mutationKey: ["profile", "update"],
-    mutationFn: async (data: Omit<Profile, "id" | "createdAt" | "updatedAt">) => {
-      return (await axiosInstance.patch<MutationResponse<Profile>>("/users/profile", data)).data;
+    mutationFn: async (
+      data: Omit<Profile, "id" | "createdAt" | "updatedAt">
+    ) => {
+      return (
+        await axiosInstance.patch<MutationResponse<Profile>>(
+          "/users/profile",
+          data
+        )
+      ).data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user", "profile"] });
@@ -114,7 +133,9 @@ export const useFollowOrUnfollowUserMutation = ({ id }: { id: string }) => {
   return useMutation<MutationResponse<User>, CustomAxiosError>({
     mutationKey: ["follow", "user", id],
     mutationFn: async () => {
-      return (await axiosInstance.patch<MutationResponse<User>>(`/users/follow/${id}`)).data;
+      return (
+        await axiosInstance.patch<MutationResponse<User>>(`/users/follow/${id}`)
+      ).data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["user", data.data.id] });

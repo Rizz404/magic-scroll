@@ -25,6 +25,7 @@ const App = createBrowserRouter(
       <Route path="/" element={<Layout />}>
         {/* <Route index element={<HomePage />} /> */}
         <Route index element={<TestPage />} />
+        <Route path="/test-studies" element={<TestStudyPage />} />
       </Route>
       <Route element={<ProtectedLayout />}>
         <Route path="/profile" element={<UserProfilePage />} />
@@ -33,7 +34,6 @@ const App = createBrowserRouter(
         <Route path="/create-study" element={<CreateStudy />} />
         <Route path="/note/:noteId" element={<NoteDetailPage />} />
         <Route path="/test" element={<TestPage />} />
-        <Route path="/test-studies/search" element={<TestStudyPage />} />
       </Route>
       <Route path="/*" element={<NotFoundPage />} />
     </>

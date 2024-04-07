@@ -2,6 +2,7 @@ import NoteCard from "@/components/note/NoteCard";
 import ErrorCard from "@/components/status/ErrorCard";
 import LoadingCard from "@/components/status/LoadingCard";
 import { useGetPaginatedNotes } from "@/services/note";
+import { useGetPaginatedUsersQuery } from "@/services/user";
 import { categories } from "@/types/Note";
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -13,14 +14,13 @@ const HomePage = () => {
   const [category, setCategory] = useState<categories>("home");
 
   const {
-    data: notes,
+    users,
     isLoading,
     isError,
     error,
-  } = useGetPaginatedNotes({
+  } = useGetPaginatedUsersQuery({
     page,
     limit,
-    category,
   });
 
   const categoryButtons: Record<string, categories>[] = [
@@ -37,9 +37,8 @@ const HomePage = () => {
       <button
         key={btn.value}
         type="button"
-        className={`btn btn-sm btn-outline even:btn-primary odd:btn-secondary ${
-          category === btn.value && "btn-active"
-        }`}
+        className={`btn btn-sm btn-outline even:btn-primary odd:btn-secondary ${category === btn.value && "btn-active"
+          }`}
         onClick={() => setCategory(btn.value)}>
         {btn.label}
       </button>
@@ -68,20 +67,24 @@ const HomePage = () => {
           {isLoading && <LoadingCard isLoading={isLoading} context="Loading notes data" />}
           {isError && <ErrorCard isError={isError} context="Error notes data" error={error!} />}
         </div>
-        <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 min-h-screen relative mb-3">
+        {/* <div className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 min-h-screen relative mb-3">
           {notes?.data.map((note, index) => (
             <NoteCard {...note} key={index} />
           ))}
+        </div> */}
+        <div>
+          {users.length > 0 && (
+            JSON.stringify(users, null, 2)
+          )}
         </div>
         <div className="flex justify-center items-center">
-          <button
+          {/* <button
             onClick={handlePrevPage}
             disabled={!notes?.paginationState?.hasPrevPage}
-            className={` bg-cyan-600 text-cyan-950 text-lg p-1 font-semibold rounded-l-full hover:text-white ${
-              !notes?.paginationState?.hasPrevPage && "text-cyan-950 hover:text-red-500"
-            }`}>
+            className={` bg-cyan-600 text-cyan-950 text-lg p-1 font-semibold rounded-l-full hover:text-white ${!notes?.paginationState?.hasPrevPage && "text-cyan-950 hover:text-red-500"
+              }`}>
             prev
-          </button>
+          </button> */}
           <select
             value={limit}
             onChange={handleLimitChange}
@@ -91,14 +94,13 @@ const HomePage = () => {
             <option value="50">50</option>
             <option value="100">100</option>
           </select>
-          <button
+          {/* <button
             onClick={handleNextPage}
             disabled={!notes?.paginationState?.hasNextPage}
-            className={` bg-cyan-600 text-cyan-950 text-lg p-1 font-semibold rounded-r-full hover:text-white ${
-              !notes?.paginationState?.hasNextPage && "text-cyan-950 hover:text-red-500"
-            }`}>
+            className={` bg-cyan-600 text-cyan-950 text-lg p-1 font-semibold rounded-r-full hover:text-white ${!notes?.paginationState?.hasNextPage && "text-cyan-950 hover:text-red-500"
+              }`}>
             next
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

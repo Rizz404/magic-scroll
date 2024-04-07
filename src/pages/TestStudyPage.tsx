@@ -1,22 +1,22 @@
 import { useSearchStudyByName } from "@/services/study";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const TestStudyPage = () => {
-  const location = useLocation();
+  const { search } = useParams();
 
   const { studies, query, setQuery, isLoadingStudies, isErrorStudies, errorStudies } =
     useSearchStudyByName({ page: 1, limit: 10 });
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchQuery = urlParams.get("search");
-    if (searchQuery) {
-      setQuery(searchQuery);
+    if (search) {
+      setQuery(search)
     }
+  }, [search, setQuery])
 
-    console.log(query.length === 0 ? "asw" : query);
-  }, [location, query, setQuery]);
+
+
+  console.log(studies)
   return (
     <div>
       {isLoadingStudies ? (
@@ -26,8 +26,8 @@ const TestStudyPage = () => {
       ) : (
         <ul>
           {studies &&
-            studies.length > 0 &&
-            studies.map((study) => <li key={study.id}>{study.name}</li>)}
+            studies.data.length > 0 &&
+            studies.data.map((study) => <li key={study.id}>{study.name}</li>)}
         </ul>
       )}
     </div>

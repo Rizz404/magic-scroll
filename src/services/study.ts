@@ -1,5 +1,5 @@
 import axiosInstance from "@/config/axiosInstance";
-import { CustomAxiosError, MutationResponse, PaginatedResponse } from "@/types/Response";
+import { MutationResponse, PaginatedResponse } from "@/types/Response";
 import { Study } from "@/types/Study";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -8,38 +8,49 @@ import { toast } from "react-toastify";
 
 export const useCreateStudy = ({ navigateTo }: { navigateTo?: string }) => {
   const navigate = useNavigate();
-  return useMutation<MutationResponse<Study>, Error, Pick<Study, "name" | "image" | "description">>(
-    {
-      mutationKey: ["studies"],
-      mutationFn: async (data) => {
-        const formData = new FormData();
+  return useMutation<
+    MutationResponse<Study>,
+    Error,
+    Pick<Study, "name" | "image" | "description">
+  >({
+    mutationKey: ["studies"],
+    mutationFn: async (data) => {
+      const formData = new FormData();
 
-        formData.append("name", data.name);
-        formData.append("description", data.description);
+      formData.append("name", data.name);
+      formData.append("description", data.description);
 
-        if (data.image) {
-          formData.append("image", (data.image as string)[0]);
-        }
+      if (data.image) {
+        formData.append("image", (data.image as string)[0]);
+      }
 
-        return (await axiosInstance.post<MutationResponse<Study>>("/studies", formData)).data;
-      },
-      onSuccess: (response) => {
-        toast.success(response.message);
-        navigateTo && navigate(navigateTo);
-      },
-      onError: (error) => {
-        toast.error(error.message);
-        console.error(error.message);
-      },
-    }
-  );
+      return (
+        await axiosInstance.post<MutationResponse<Study>>("/studies", formData)
+      ).data;
+    },
+    onSuccess: (response) => {
+      toast.success(response.message);
+      navigateTo && navigate(navigateTo);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      console.error(error.message);
+    },
+  });
 };
 
-export const useGetStudies = ({ page, limit }: { page: number; limit: number }) => {
+export const useGetStudies = ({
+  page,
+  limit,
+}: {
+  page: number;
+  limit: number;
+}) => {
   return useQuery<PaginatedResponse<Study>, Error>({
     queryKey: ["studies", page, limit],
     queryFn: async () => {
-      return (await axiosInstance.get("/studies", { params: { page, limit } })).data;
+      return (await axiosInstance.get("/studies", { params: { page, limit } }))
+        .data;
     },
   });
 };
@@ -63,20 +74,22 @@ export const useSearchStudyByName = ({
   const [query, setQuery] = useState("");
 
   const { data, isLoading, isError, error, refetch, ...rest } = useQuery<
-    PaginatedResponse<Study>,
-    CustomAxiosError
+    PaginatedResponse<Study>
   >({
     queryKey: ["search-study", query],
-    queryFn: () => {
-      return axiosInstance.get("/studies/search", { params: { name: query, page, limit } });
+    queryFn: async () => {
+      return (
+        await axiosInstance.get("/studies/search", {
+          params: { name: query, page, limit },
+        })
+      ).data;
     },
-    enabled: query.trim().length > 0,
   });
 
   return {
     query,
     setQuery,
-    studies: data && data.data,
+    studies: data?.data || [],
     studiesPaginationState: data?.paginationState,
     isLoadingStudies: isLoading,
     isErrorStudies: isError,
