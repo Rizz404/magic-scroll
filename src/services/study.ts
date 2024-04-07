@@ -1,7 +1,8 @@
 import axiosInstance from "@/config/axiosInstance";
-import { MutationResponse, PaginatedResponse } from "@/types/Response";
+import { CustomAxiosError, MutationResponse, PaginatedResponse } from "@/types/Response";
 import { Study } from "@/types/Study";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -11,7 +12,16 @@ export const useCreateStudy = ({ navigateTo }: { navigateTo?: string }) => {
     {
       mutationKey: ["studies"],
       mutationFn: async (data) => {
-        return (await axiosInstance.post<MutationResponse<Study>>("/studies", data)).data;
+        const formData = new FormData();
+
+        formData.append("name", data.name);
+        formData.append("description", data.description);
+
+        if (data.image) {
+          formData.append("image", (data.image as string)[0]);
+        }
+
+        return (await axiosInstance.post<MutationResponse<Study>>("/studies", formData)).data;
       },
       onSuccess: (response) => {
         toast.success(response.message);
@@ -41,4 +51,37 @@ export const useGetStudyById = ({ id }: { id: string }) => {
       return (await axiosInstance.get<Study>(`/studies/${id}`)).data;
     },
   });
+};
+
+export const useSearchStudyByName = ({
+  page = 1,
+  limit = 5,
+}: {
+  page?: number;
+  limit?: number;
+}) => {
+  const [query, setQuery] = useState("");
+
+  const { data, isLoading, isError, error, refetch, ...rest } = useQuery<
+    PaginatedResponse<Study>,
+    CustomAxiosError
+  >({
+    queryKey: ["search-study", query],
+    queryFn: () => {
+      return axiosInstance.get("/studies/search", { params: { name: query, page, limit } });
+    },
+    enabled: query.trim().length > 0,
+  });
+
+  return {
+    query,
+    setQuery,
+    studies: data && data.data,
+    studiesPaginationState: data?.paginationState,
+    isLoadingStudies: isLoading,
+    isErrorStudies: isError,
+    errorStudies: error,
+    refetchStudies: refetch,
+    ...rest,
+  };
 };

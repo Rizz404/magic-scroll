@@ -1,5 +1,5 @@
 import axiosInstance from "@/config/axiosInstance";
-import { Note, NoteInput, NoteInteraction } from "@/types/Note";
+import { Note, NoteInput, NoteInteraction, NoteListsProps } from "@/types/Note";
 import { CustomAxiosError, MutationResponse, PaginatedResponse } from "@/types/Response";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -26,11 +26,11 @@ export const useCreateNote = ({ navigateTo }: { navigateTo: string }) => {
   });
 };
 
-export const useGetPaginatedNotes = ({ page, limit }: { page: number; limit: number }) => {
+export const useGetPaginatedNotes = ({ page, limit, category, order }: NoteListsProps) => {
   return useQuery<PaginatedResponse<Note>, CustomAxiosError>({
-    queryKey: ["notes", page, limit],
+    queryKey: ["notes", page, limit, category, order],
     queryFn: async () => {
-      return (await axiosInstance.get("/notes", { params: { page, limit } })).data;
+      return (await axiosInstance.get("/notes", { params: { page, limit, category, order } })).data;
     },
   });
 };

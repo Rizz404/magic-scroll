@@ -2,13 +2,15 @@ import NoteCard from "@/components/note/NoteCard";
 import ErrorCard from "@/components/status/ErrorCard";
 import LoadingCard from "@/components/status/LoadingCard";
 import { useGetPaginatedNotes } from "@/services/note";
-import React from "react";
+import { categories } from "@/types/Note";
+import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 const HomePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 20;
+  const [category, setCategory] = useState<categories>("home");
 
   const {
     data: notes,
@@ -18,7 +20,31 @@ const HomePage = () => {
   } = useGetPaginatedNotes({
     page,
     limit,
+    category,
   });
+
+  const categoryButtons: Record<string, categories>[] = [
+    { label: "home", value: "home" },
+    { label: "shared", value: "shared" },
+    { label: "private", value: "private" },
+    { label: "favorited", value: "favorited" },
+    { label: "saved", value: "saved" },
+    { label: "self", value: "self" },
+  ];
+
+  const renderCategoryButtons = () => {
+    return categoryButtons.map((btn) => (
+      <button
+        key={btn.value}
+        type="button"
+        className={`btn btn-sm btn-outline even:btn-primary odd:btn-secondary ${
+          category === btn.value && "btn-active"
+        }`}
+        onClick={() => setCategory(btn.value)}>
+        {btn.label}
+      </button>
+    ));
+  };
 
   const handlePrevPage = () => {
     setSearchParams({ page: `${page - 1}`, limit: `${limit}` });
@@ -35,6 +61,9 @@ const HomePage = () => {
   return (
     <div className="text-cyan-950 bg-cyan-100 py-2">
       <div className="px-2 lg:px-8">
+        <div className="border border-black w-full rounded-md p-2 mb-3">
+          <div className=" flex justify-between items-center">{renderCategoryButtons()}</div>
+        </div>
         <div className="absolute z-10 flex justify-center items-center">
           {isLoading && <LoadingCard isLoading={isLoading} context="Loading notes data" />}
           {isError && <ErrorCard isError={isError} context="Error notes data" error={error!} />}

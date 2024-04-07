@@ -1,5 +1,5 @@
 import axiosInstance from "@/config/axiosInstance";
-import { MutationResponse, PaginatedResponse } from "@/types/Response";
+import { CustomAxiosError, MutationResponse, PaginatedResponse } from "@/types/Response";
 import { Tag } from "@/types/Tag";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -39,4 +39,27 @@ export const useGetTagById = ({ id }: { id: string }) => {
       return response.data;
     },
   });
+};
+
+export const useSearchTagByName = ({ name }: { name: string }) => {
+  const { data, isLoading, isError, error, refetch, ...rest } = useQuery<
+    PaginatedResponse<Tag>,
+    CustomAxiosError
+  >({
+    queryKey: ["search-tag", name],
+    queryFn: () => {
+      return axiosInstance.get("/tags/search", { params: { name } });
+    },
+    enabled: Boolean(name),
+  });
+
+  return {
+    tags: data?.data,
+    tagsPaginationState: data?.paginationState,
+    isLoadingTags: isLoading,
+    isErrorTags: isError,
+    errorTags: error,
+    refetchTags: refetch,
+    ...rest,
+  };
 };

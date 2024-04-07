@@ -54,3 +54,13 @@ export type NoteInput = Omit<
   tags: Pick<Tag, "id">[];
   notePermission: Pick<NotePermission, "userId">[];
 };
+
+export type categories = "home" | "shared" | "private" | "favorited" | "saved" | "self";
+export type orders = "best" | "worst" | "new" | "old";
+
+export interface NoteListsProps {
+  page: number;
+  limit: number;
+  category?: categories;
+  order?: orders;
+}

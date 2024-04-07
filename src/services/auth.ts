@@ -59,14 +59,14 @@ export const useLogoutMutation = ({ navigateTo }: Omit<UseAuthMutationProps, "au
   return useMutation<{ message: string }, CustomAxiosError>({
     mutationKey: ["auth"],
     mutationFn: async () => {
+      await signOut(firebaseAuth);
       return (
         await axiosInstance.post<{ message: string }>("/auth/logout", null, {
           headers: { Authorization: null },
         })
       ).data;
     },
-    onSuccess: async (response) => {
-      await signOut(firebaseAuth);
+    onSuccess: (response) => {
       localStorage.removeItem("token");
       setCurrentUserInfo(null);
       navigateTo && navigate(navigateTo);
