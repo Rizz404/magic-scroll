@@ -23,7 +23,8 @@ const App = createBrowserRouter(
         <Route path="/login" element={<LoginPage />} />
       </Route>
       <Route path="/" element={<Layout />}>
-        <Route index element={<HomePage />} />
+        {/* <Route index element={<HomePage />} /> */}
+        <Route index element={<TestPage />} />
       </Route>
       <Route element={<ProtectedLayout />}>
         <Route path="/profile" element={<UserProfilePage />} />
